@@ -1,1 +1,1 @@
-Currently under development, documentation to come later !
+Currently under development, documentation will come later!
