@@ -89,8 +89,12 @@ class DellCatalogManager(CachedAPI):
 
     def extract_cab_file(self):
         try:
+            if os.path.exists(self.extracted_catalog_filepath):
+                os.remove(self.extracted_catalog_filepath)
+
             if patoolib.is_archive(self.catalog_filepath):
-                patoolib.extract_archive(self.catalog_filepath, outdir=settings.DATA_DIR)
+                print(f'Extracting the downloaded archive {self.catalog_name}')
+                patoolib.extract_archive(self.catalog_filepath, outdir=settings.DATA_DIR, verbosity=-1)
                 return True
             else:
                 print("This is not an archive !")
