@@ -1,2 +1,4 @@
 packaging_legacy
 pyunpack
+python-dotenv
+requests
