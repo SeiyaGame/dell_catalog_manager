@@ -9,18 +9,19 @@ import os.path
 import xml.etree.ElementTree as ET
 from urllib.parse import unquote
 
+
 class DellCatalogManager(CachedAPI):
     def __init__(self, cache_time_hours=6):
-        
+
         self.catalog_name = 'CatalogPC.cab'
         self.extracted_catalog_name = 'CatalogPC.xml'
-        
+
         self.catalog_cache_file = os.path.join(settings.DATA_DIR, 'CatalogPC.json')
-        
+
         super().__init__(self.catalog_cache_file, cache_time_hours * 60)
 
         self.base_url = "https://downloads.dell.com"
-        
+
         self.cache_key = os.path.join(self.base_url, self.catalog_name)
 
         self.headers = {
@@ -106,7 +107,6 @@ class DellCatalogManager(CachedAPI):
         try:
             filepath_xml_catalog = os.path.join(settings.DATA_DIR, self.extracted_catalog_name)
             if self.download_catalog() and self.extract_cab_file():
-                
                 main_catalog = ET.parse(filepath_xml_catalog)
                 main_catalog_tree = main_catalog.getroot()
 
@@ -124,7 +124,7 @@ class DellCatalogManager(CachedAPI):
 
     def get_catalog(self):
         return self.get_cached_data(self.cache_key, self.extract_software_components)
-    
+
     def extract_software_components(self, only_model_name=False):
 
         def is_duplicate(entry, entry_list):
