@@ -1,13 +1,14 @@
 import re
 from packaging_legacy.version import LegacyVersion
 import requests
-from pyunpack import Archive
 from cache import CachedAPI
 import settings
 from tools import generate_random_user_agent
 import os.path
 import xml.etree.ElementTree as ET
 from urllib.parse import unquote
+import patoolib
+from patoolib.util import PatoolError
 
 
 class DellCatalogManager(CachedAPI):
@@ -16,8 +17,10 @@ class DellCatalogManager(CachedAPI):
         self.catalog_name = 'CatalogPC.cab'
         self.extracted_catalog_name = 'CatalogPC.xml'
 
-        self.catalog_cache_file = os.path.join(settings.DATA_DIR, 'CatalogPC.json')
+        self.catalog_filepath = os.path.join(settings.DATA_DIR, self.catalog_name)
+        self.extracted_catalog_filepath = os.path.join(settings.DATA_DIR, self.extracted_catalog_name)
 
+        self.catalog_cache_file = os.path.join(settings.DATA_DIR, 'CatalogPC.json')
         super().__init__(self.catalog_cache_file, cache_time_hours * 60)
 
         self.base_url = "https://downloads.dell.com"
@@ -86,36 +89,22 @@ class DellCatalogManager(CachedAPI):
         return downloaded
 
     def extract_cab_file(self):
-
-        catalog_filepath = os.path.join(settings.DATA_DIR, self.catalog_name)
-        catalog_filepath_xml = os.path.join(settings.DATA_DIR, self.extracted_catalog_name)
-
-        if os.path.isfile(catalog_filepath_xml):
-            return "The dell catalog is already extracted!"
-
         try:
-            print("Extracting file ...")
-            Archive(catalog_filepath).extractall(settings.DATA_DIR)
+            if patoolib.is_archive(self.catalog_filepath):
+                patoolib.extract_archive(self.catalog_filepath, outdir=settings.DATA_DIR)
             return True
-
-        except Exception as e:
+        except PatoolError as e:
             print(f"An error occurred, impossible to extract dell catalog ! ({e})")
             return False
 
     def load_xml_catalog(self):
 
         try:
-            filepath_xml_catalog = os.path.join(settings.DATA_DIR, self.extracted_catalog_name)
             if self.download_catalog() and self.extract_cab_file():
-                main_catalog = ET.parse(filepath_xml_catalog)
-                main_catalog_tree = main_catalog.getroot()
+                xml_catalog = ET.parse(self.extracted_catalog_filepath)
+                xml_catalog_tree = xml_catalog.getroot()
+                return xml_catalog_tree
 
-                return main_catalog_tree
-
-            return None
-
-        except FileNotFoundError as e:
-            print(f"File not found: {e}")
             return None
 
         except Exception as e:
@@ -131,6 +120,8 @@ class DellCatalogManager(CachedAPI):
             return any(entry == existing_entry for existing_entry in entry_list)
 
         catalog = self.load_xml_catalog()
+        if not catalog:
+            return {}
 
         data = {}
         model_data = {}
