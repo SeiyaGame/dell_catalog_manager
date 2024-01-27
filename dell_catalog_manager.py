@@ -224,7 +224,7 @@ class DellCatalogManager(CachedAPI):
 
         if latest_filename in os.listdir(local_brand_storage):
             print(f"Latest BIOS version ({latest_version}) is already downloaded for {brand} {model}")
-            return
+            return False
 
         download_url = latest_bios['download_url']
         print(f"Downloading latest BIOS version ({latest_version}) for {brand} {model} ...")
@@ -233,9 +233,9 @@ class DellCatalogManager(CachedAPI):
         if downloaded:
             print(f"Latest BIOS version ({latest_version}) for {brand} {model} downloaded successfully.")
             return True
-        else:
-            print(f"Latest BIOS version ({latest_version}) for {brand} {model} cannot be downloaded ...")
-            return False
+
+        print(f"Latest BIOS version ({latest_version}) for {brand} {model} cannot be downloaded ...")
+        return
 
 
 def parse_existing_bios_files(bios_repo_base_dir):
