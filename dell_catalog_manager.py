@@ -289,8 +289,7 @@ def check_and_update_bios(dell_catalog_manager):
     existing_bios_files = parse_existing_bios_files(settings.BIOS_REPO_DIR)
     for brand, models in existing_bios_files.items():
         for model, versions in models.items():
-            if dell_catalog_manager.update_bios(brand, model):
-                pass
+            dell_catalog_manager.update_bios(brand, model)
 
             # Deleting Old version
             versions_to_delete = versions[1:]
