@@ -92,7 +92,11 @@ class DellCatalogManager(CachedAPI):
         try:
             if patoolib.is_archive(self.catalog_filepath):
                 patoolib.extract_archive(self.catalog_filepath, outdir=settings.DATA_DIR)
-            return True
+                return True
+            else:
+                print("This is not an archive !")
+                return False
+
         except PatoolError as e:
             print(f"An error occurred, impossible to extract dell catalog ! ({e})")
             return False
