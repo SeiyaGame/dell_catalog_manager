@@ -297,18 +297,20 @@ def check_and_update_bios(dell_catalog_manager):
             delete_old_bios_version(brand, model, versions_to_delete)
 
 
-dell_catalog_manager = DellCatalogManager()
+if __name__ == "__main__":
+    dell_catalog_manager = DellCatalogManager()
 
-# result = dell_catalog_manager.find_bios_files('Optiplex', '3070', latest=True)
-# result = dell_catalog_manager.find_bios_files('Precision', 'T3620', latest=True)
-# result = dell_catalog_manager.find_bios_files('Latitude', '3190', latest=True)
-result = dell_catalog_manager.find_bios_files('Optiplex', '3010', latest=True)
-print(result)
+    # result = dell_catalog_manager.find_bios_files('Optiplex', '3070', latest=True)
+    # result = dell_catalog_manager.find_bios_files('Precision', 'T3620', latest=True)
+    # result = dell_catalog_manager.find_bios_files('Latitude', '3190', latest=True)
+    # result = dell_catalog_manager.find_bios_files('Optiplex', '3010', latest=True)
 
-dell_catalog_manager.update_bios('OptiPlex', '7010')
+    # dell_catalog_manager.update_bios('OptiPlex', '7010')
+    # dell_catalog_manager.update_bios('OptiPlex', '3010')
+    # dell_catalog_manager.update_bios('OptiPlex', '3020')
 
-# print(parse_existing_bios_files(BIOS_REPO_DIR))
+    # print(parse_existing_bios_files(settings.BIOS_REPO_DIR))
 
-# check_and_update_bios(dell_catalog_manager, BIOS_REPO_DIR)
+    check_and_update_bios(dell_catalog_manager)
 
-# dell_catalog_manager.extract_software_components(only_model_name=True, destination='test_catalog.json')
+    # dell_catalog_manager.extract_software_components(only_model_name=True, destination='test_catalog.json')
