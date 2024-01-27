@@ -247,7 +247,7 @@ def parse_existing_bios_files(bios_repo_base_dir):
 
             bios_files_info[brand] = {}
             for filename in os.listdir(brand_path):
-                match = re.match(r'(.+)\[(.+)\]\.exe', filename)
+                match = re.match(r'(.+)\[(.+)]\.exe', filename)
 
                 if match is None:
                     print(f"Could not parse filename: {filename}")
@@ -263,7 +263,8 @@ def parse_existing_bios_files(bios_repo_base_dir):
 
             # Sort versions for each model in descending order
             for model in bios_files_info[brand]:
-                bios_files_info[brand][model] = sorted(bios_files_info[brand][model], reverse=True)
+                bios_files_info[brand][model] = sorted(bios_files_info[brand][model],
+                                                       key=lambda x: LegacyVersion(x), reverse=True)
 
     return bios_files_info
 
