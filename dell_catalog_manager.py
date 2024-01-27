@@ -273,26 +273,28 @@ def parse_existing_bios_files(bios_repo_base_dir):
     return bios_files_info
 
 
-def check_and_update_bios(dell_catalog_manager, bios_repo_base_dir):
-    existing_bios_files = parse_existing_bios_files(bios_repo_base_dir)
+def delete_old_bios_version(brand, model, versions_to_delete: list):
+    brand_dir = os.path.join(settings.BIOS_REPO_DIR, brand)
+    for v in versions_to_delete:
+
+        filename = f"{brand}_{model}[{v}].exe"
+        filepath = os.path.join(brand_dir, filename)
+
+        if os.path.exists(filepath):
+            print(f"Deleting old bios version ({v}) for {brand} {model} ")
+            os.remove(filepath)
+
+
+def check_and_update_bios(dell_catalog_manager):
+    existing_bios_files = parse_existing_bios_files(settings.BIOS_REPO_DIR)
     for brand, models in existing_bios_files.items():
         for model, versions in models.items():
+            if dell_catalog_manager.update_bios(brand, model):
+                pass
 
-            catalog_brand = brand  # Example: convert to the appropriate format if needed
-            catalog_model = model  # Example: convert to the appropriate format if needed
-
-            latest_bios = dell_catalog_manager.find_bios_files(catalog_brand, catalog_model, latest=True)
-            latest_version = latest_bios['dellVersion'] if latest_bios else None
-            existing_latest_version = versions[0]
-
-            if latest_version and LegacyVersion(latest_version) > LegacyVersion(existing_latest_version):
-                print(f"Updating BIOS for {brand} {model} from {existing_latest_version} to {latest_version}")
-
-                download_url = latest_bios['download_url']
-                filename = f"{brand}_{model}[{latest_version}].exe"
-
-                brand_filedir = os.path.join(bios_repo_base_dir, brand)
-                dell_catalog_manager.download_file(download_url, brand_filedir, filename)
+            # Deleting Old version
+            versions_to_delete = versions[1:]
+            delete_old_bios_version(brand, model, versions_to_delete)
 
 
 dell_catalog_manager = DellCatalogManager()
