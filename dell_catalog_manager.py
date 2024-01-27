@@ -72,7 +72,6 @@ class DellCatalogManager(CachedAPI):
             with open(filepath, 'wb') as f:
                 for chunk in response.iter_content(chunk_size=1024):
                     f.write(chunk)
-            print(f"{filename} downloaded successfully.")
             return True
 
         except Exception as e:
@@ -208,9 +207,12 @@ class DellCatalogManager(CachedAPI):
             print(f"No BIOS files found for brand: {brand}, model: {model}")
             return None
 
-    def update_bios(self, brand, model, bios_repo_base_dir):
+    def update_bios(self, brand, model):
 
-        local_brand_storage = os.path.join(bios_repo_base_dir, brand)
+        local_brand_storage = os.path.join(settings.BIOS_REPO_DIR, brand)
+        if not os.path.exists(local_brand_storage):
+            os.makedirs(local_brand_storage, exist_ok=True)
+
         latest_bios = self.find_bios_files(brand, model, latest=True)
 
         if latest_bios is None:
@@ -296,7 +298,7 @@ dell_catalog_manager = DellCatalogManager()
 result = dell_catalog_manager.find_bios_files('Optiplex', '3010', latest=True)
 print(result)
 
-# dell_catalog_manager.update_bios('OptiPlex', '7010', BIOS_REPO_DIR)
+dell_catalog_manager.update_bios('OptiPlex', '7010')
 
 # print(parse_existing_bios_files(BIOS_REPO_DIR))
 
