@@ -216,25 +216,25 @@ class DellCatalogManager(CachedAPI):
         latest_bios = self.find_bios_files(brand, model, latest=True)
 
         if latest_bios is None:
-            print("No BIOS found for the given brand and model.")
+            print(f"No BIOS found for {brand} brand and {model} model.")
             return
 
         latest_version = latest_bios['dellVersion']
         latest_filename = f"{brand}_{model}[{latest_version}].exe"
 
         if latest_filename in os.listdir(local_brand_storage):
-            print(f"Latest BIOS version {latest_version} is already downloaded.")
+            print(f"Latest BIOS version ({latest_version}) is already downloaded for {brand} {model}")
             return
 
         download_url = latest_bios['download_url']
-        print(f"Downloading latest BIOS version {latest_version}...")
+        print(f"Downloading latest BIOS version ({latest_version}) for {brand} {model} ...")
         downloaded = self.download_file(download_url, local_brand_storage, latest_filename)
 
         if downloaded:
-            print(f"Latest BIOS version {latest_version} downloaded successfully.")
+            print(f"Latest BIOS version ({latest_version}) for {brand} {model} downloaded successfully.")
             return True
         else:
-            print(f"Latest BIOS version {latest_version} cannot be downloaded ...")
+            print(f"Latest BIOS version ({latest_version}) for {brand} {model} cannot be downloaded ...")
             return False
 
 
