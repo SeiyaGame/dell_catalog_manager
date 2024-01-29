@@ -2,7 +2,9 @@ import json
 import re
 import chardet
 import xml.etree.ElementTree as ET
+import patoolib
 from fake_useragent import UserAgent
+from patoolib.util import PatoolError
 
 
 def save_request_as_json(output, destination_file, save_encoding='utf-8'):
@@ -42,3 +44,20 @@ def load_xml_file(filepath):
 
     # Parse the modified XML
     return ET.fromstring(modified_xml_data)
+
+
+def extract_cab_file(filepath, destination):
+    try:
+        # Extract the archive
+        if patoolib.is_archive(filepath):
+            print(f'Extracting the archive ...')
+            patoolib.extract_archive(filepath, outdir=destination, verbosity=-1)
+            print(f'Done !')
+            return True
+        else:
+            print("This is not an archive !")
+            return
+
+    except PatoolError as e:
+        print(f"An error occurred, impossible to extract the cab file ! ({e})")
+        return
