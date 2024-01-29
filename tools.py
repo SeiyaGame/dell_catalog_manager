@@ -1,4 +1,7 @@
 import json
+import re
+import chardet
+import xml.etree.ElementTree as ET
 from fake_useragent import UserAgent
 
 
@@ -18,3 +21,24 @@ def generate_random_user_agent():
     ua = UserAgent(browsers=['chrome', 'firefox', 'edge'])
     random_user_agent = ua.random
     return random_user_agent
+
+
+def load_xml_file(filepath):
+    # Detect the encoding of the XML file
+    with open(filepath, 'rb') as file:
+        detector = chardet.universaldetector.UniversalDetector()
+        for line in file.readlines():
+            detector.feed(line)
+            if detector.done:
+                break
+        encoding = detector.result['encoding']
+
+    # Read the XML file
+    with open(filepath, 'r', encoding=encoding) as file:
+        xml_data = file.read()
+
+    # Remove the entire xmlns attribute using regular expressions
+    modified_xml_data = re.sub(r'\s?xmlns="[^"]+"', '', xml_data)
+
+    # Parse the modified XML
+    return ET.fromstring(modified_xml_data)

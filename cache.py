@@ -18,7 +18,7 @@ class CachedAPI:
 
     def save_cache(self):
         with open(self.cache_file, 'w') as file:
-            json.dump(self.cache, file)
+            json.dump(self.cache, file, indent=4)
 
     def is_cache_stale(self, cache_key):
         """

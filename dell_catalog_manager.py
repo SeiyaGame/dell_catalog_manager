@@ -3,9 +3,8 @@ from packaging_legacy.version import LegacyVersion
 import requests
 from cache import CachedAPI
 import settings
-from tools import generate_random_user_agent
+from tools import generate_random_user_agent, load_xml_file
 import os.path
-import xml.etree.ElementTree as ET
 from urllib.parse import unquote
 import patoolib
 from patoolib.util import PatoolError
@@ -108,10 +107,7 @@ class DellCatalogManager(CachedAPI):
 
         try:
             if self.download_catalog() and self.extract_cab_file():
-                xml_catalog = ET.parse(self.extracted_catalog_filepath)
-                xml_catalog_tree = xml_catalog.getroot()
-                return xml_catalog_tree
-
+                load_xml_file(self.extracted_catalog_filepath)
             return None
 
         except Exception as e:
