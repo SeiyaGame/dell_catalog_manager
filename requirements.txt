@@ -1,4 +1,4 @@
 packaging_legacy
-python-dotenv
-requests
-patool
+python-dotenv~=1.0.1
+requests~=2.31.0
+patool~=2.1.1
