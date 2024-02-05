@@ -8,6 +8,7 @@ from tools import generate_random_user_agent, load_xml_file, extract_cab_file
 import os.path
 from urllib.parse import unquote
 
+
 #
 # All : https://downloads.dell.com/catalog/CatalogPC.cab
 #
@@ -159,59 +160,57 @@ class DellCatalogManager(CachedAPI):
 
         return save_data
 
+    def find_bios_files(self, brand, model, latest=False):
+        """Find BIOS files for a specific machine by its brand and model."""
+        catalog = self.get_catalog()
 
-def find_bios_files(self, brand, model, latest=False):
-    """Find BIOS files for a specific machine by its brand and model."""
-    catalog = self.get_catalog()
+        brand = brand.lower()
+        model = model.lower()
 
-    brand = brand.lower()
-    model = model.lower()
+        if catalog is None:
+            return None
 
-    if catalog is None:
-        return None
+        try:
+            bios_entries = catalog[brand][model]['bios']
 
-    try:
-        bios_entries = catalog[brand][model]['bios']
+            if latest and bios_entries:
+                latest_bios_entry = max(bios_entries, key=lambda x: LegacyVersion(x['vendorVersion']))
+                return latest_bios_entry
 
-        if latest and bios_entries:
-            latest_bios_entry = max(bios_entries, key=lambda x: LegacyVersion(x['vendorVersion']))
-            return latest_bios_entry
+            return bios_entries
 
-        return bios_entries
+        except KeyError:
+            print(f"No BIOS files found for brand: {brand}, model: {model}")
+            return None
 
-    except KeyError:
-        print(f"No BIOS files found for brand: {brand}, model: {model}")
-        return None
+    def download_latest_bios(self, brand, model):
+        local_brand_storage = os.path.join(settings.BIOS_REPO_DIR, brand)
+        if not os.path.exists(local_brand_storage):
+            os.makedirs(local_brand_storage, exist_ok=True)
 
+        latest_bios = self.find_bios_files(brand, model, latest=True)
 
-def download_latest_bios(self, brand, model):
-    local_brand_storage = os.path.join(settings.BIOS_REPO_DIR, brand)
-    if not os.path.exists(local_brand_storage):
-        os.makedirs(local_brand_storage, exist_ok=True)
+        if latest_bios is None:
+            print(f"No BIOS found for {brand} brand and {model} model.")
+            return
 
-    latest_bios = self.find_bios_files(brand, model, latest=True)
+        latest_version = latest_bios['dellVersion']
+        latest_filename = f"{brand}_{model}[{latest_version}].exe"
 
-    if latest_bios is None:
-        print(f"No BIOS found for {brand} brand and {model} model.")
+        if latest_filename in os.listdir(local_brand_storage):
+            print(f"Latest BIOS version ({latest_version}) is already downloaded for {brand} {model}")
+            return False
+
+        download_url = latest_bios['download_url']
+        print(f"Downloading latest BIOS version ({latest_version}) for {brand} {model} ...")
+        downloaded = self.download_file(download_url, local_brand_storage, latest_filename)
+
+        if downloaded:
+            print(f"Latest BIOS version ({latest_version}) for {brand} {model} downloaded successfully.")
+            return True
+
+        print(f"Latest BIOS version ({latest_version}) for {brand} {model} cannot be downloaded ...")
         return
-
-    latest_version = latest_bios['dellVersion']
-    latest_filename = f"{brand}_{model}[{latest_version}].exe"
-
-    if latest_filename in os.listdir(local_brand_storage):
-        print(f"Latest BIOS version ({latest_version}) is already downloaded for {brand} {model}")
-        return False
-
-    download_url = latest_bios['download_url']
-    print(f"Downloading latest BIOS version ({latest_version}) for {brand} {model} ...")
-    downloaded = self.download_file(download_url, local_brand_storage, latest_filename)
-
-    if downloaded:
-        print(f"Latest BIOS version ({latest_version}) for {brand} {model} downloaded successfully.")
-        return True
-
-    print(f"Latest BIOS version ({latest_version}) for {brand} {model} cannot be downloaded ...")
-    return
 
 
 def parse_existing_bios_files(bios_repo_base_dir):
@@ -293,8 +292,8 @@ if __name__ == "__main__":
 
     # print(parse_existing_bios_files(settings.BIOS_REPO_DIR))
 
-    # check_and_update_bios(dell_catalog_manager)
+    check_and_update_bios(dell_catalog_manager)
 
-    print(dell_catalog_manager.get_catalog())
+    # print(dell_catalog_manager.get_catalog())
 
     # dell_catalog_manager.extract_software_components(only_model_name=True, destination='test_catalog.json')
